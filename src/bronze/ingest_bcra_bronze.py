@@ -3,19 +3,28 @@ import json
 import requests
 from datetime import datetime
 
-BCRA_API_URL = "https://api.bcra.gob.ar/principal/v1.0/variables"
+# Endpoint v4.0 con parámetros de fecha obligatorios
+BASE_URL = "https://api.bcra.gob.ar/estadisticas/v4.0/monetarias/5"
 OUTPUT_DIR = "data/bronze/bcra"
 
 def ingest_bcra_data():
+    """Consume la serie v4.0 del BCRA y guarda la respuesta en crudo."""
     try:
-        response = requests.get(BCRA_API_URL, verify=False)
+        # Parámetros de consulta
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        params = {
+            "desde": "2024-01-01",
+            "hasta": today_str
+        }
+
+        response = requests.get(BASE_URL, params=params, verify=False, timeout=30)
         response.raise_for_status()
         raw_data = response.json()
 
         os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-        today = datetime.now().strftime("%Y%m%d_%H%M%S")
-        file_path = os.path.join(OUTPUT_DIR, f"bcra_raw_{today}.json")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_path = os.path.join(OUTPUT_DIR, f"bcra_monetarias_5_{timestamp}.json")
 
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(raw_data, f, ensure_ascii=False, indent=4)
