@@ -9,12 +9,12 @@ SILVER_DIR = "data/silver/bcra"
 def get_latest_bronze_file():
     files = glob.glob(os.path.join(BRONZE_DIR, "*.json"))
     if not files:
-        raise FileNotFoundError("No se encontraron archivos en Bronze.")
+        raise FileNotFoundError("No se encontraron archivos en la capa Bronze.")
     return max(files, key=os.path.getctime)
 
 def transform_to_silver():
     latest_file = get_latest_bronze_file()
-    print(f"[Silver] Procesando: {latest_file}")
+    print(f"[Silver] Procesando archivo de Bronze: {latest_file}")
     
     with open(latest_file, "r", encoding="utf-8") as f:
         raw_json = json.load(f)
@@ -41,7 +41,7 @@ def transform_to_silver():
     output_path = os.path.join(SILVER_DIR, "bcra_monetarias_5_clean.parquet")
     df.to_parquet(output_path, index=False, engine="pyarrow")
     
-    print(f"[Silver] Archivo guardado: {output_path}")
+    print(f"[Silver] Capa Silver procesada con éxito: {output_path}")
     return output_path
 
 if __name__ == "__main__":
